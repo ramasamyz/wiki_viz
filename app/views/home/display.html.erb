@@ -1,42 +1,118 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<style>
+<div class="navbar navbar navbar-fixed-top" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-form navbar-right">
+    <%= render "table" %>
+  </div>
+  </div>
+</div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-4 col-md-3 sidebar">
+      <ul class="nav nav-sidebar well well-sm">
+        <li>
+        <%=  select_tag "table" ,  options_for_select(@tables.keys.collect { |c| [ c, c ] }), id: "table_id" %>
+        </li>
+      </ul>
+      <ul class="nav nav-sidebar well well-sm">
+        <%= label_tag 'x axis'%>
+        <%=  select_tag "axis1",  options_for_select(@tables.values[0].first.keys.collect { |c| [ c, c ] })%>
+      </ul>
+      <ul class="nav nav-sidebar well well-sm">
+        <%= label_tag 'y axis'%>
+        <%=  select_tag "axis2",options_for_select(@tables.values[0].first.keys.collect { |c| [ c, c ] })%>
+      </ul>
+      <ul class="nav nav-sidebar">
+        <%= button_tag 'redraw' , :id=> "button" %>
+      </ul>
+    </div>
+    <div class="col-sm-8 col-md-9  main">
+      <div id= "place"/>
+      </div>
+    </div>
+  </div>
+  <script>
+var data = <%=raw @tables.to_json %>
+$(document).ready(function() {
 
-.bar {
-  fill: steelblue;
+    function populate(){
+    var table = $('#table_id').val();
+
+    $('#axis1').empty();
+    $('#axis2').empty();
+    for (key in data[table][0]){
+    $('#axis1').append(new Option(key,key));
+    $('#axis2').append(new Option(key,key));
+    }
+    }
+
+    $("#table_id").change(populate);
+    $("#button").click(function(){
+      visualize();
+      }); 
+    });
+
+
+
+function visualize(){
+  $('svg').remove()
+    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+        width = 860 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+  var table = $("#table_id").val()
+    var axis1 = $('#axis1').val()
+    var axis2 = $('#axis2').val()
+
+    var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+  var y = d3.scale.linear()
+    .range([height, 0]);
+
+  var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+
+    var svg = d3.select("#place").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  x.domain(data[table].map(function(d) {return d[axis1].substring(0,4); }));
+
+  svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+  svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("Frequency");
+
+
+
+  svg.selectAll(".bar")
+    .data(data[table])
+    .enter().append("rect")
+    .attr("class", "bar")
+    .attr("x", function(d) { return  x(d[axis1].substring(0,4)); })
+    .attr("width", x.rangeBand())
+    .attr("y", function(d) { return y(d[axis2]); })
+    .attr("height", function(d) { return height - y(d[axis2]); });
+
 }
 
-.bar:hover {
-  fill: brown;
-}
-
-.axis {
-  font: 10px sans-serif;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.x.axis path {
-  display: none;
-}
-
-</style>
-<body>
-<div class ="chart"/>
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script>
-var data = <%=raw @table %>
-d3.select(".chart")
-  .selectAll("div")
-  .data(data)
-  .enter().append("div")
-  .style("width", function(d) { return d.third * 100 + "px"; })
-  .style("background-color","red")
-  .text(function(d) { return d.second; });
-</script>
+  </script>
 

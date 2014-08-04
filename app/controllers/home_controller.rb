@@ -3,7 +3,12 @@ class HomeController < ApplicationController
   end
 
   def display
+    flash[:notice] = "" 
     wiki_page = Wiki.new(params[:page],rvparse: 1)
-    @table = wiki_page.parse_table
+    @tables = wiki_page.parse_table
+    if @tables.empty?
+      flash[:notice] = "No Table was parsed for page: #{params[:page]}"
+      render 'index'
+    end
   end
 end

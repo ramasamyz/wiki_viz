@@ -1,0 +1,6 @@
+<%= form_tag("/home", method: "display") do
+ %>
+  <%= label_tag(:page, "Search for:") %>
+  <%= text_field_tag(:page) %>
+  <%= submit_tag("Search") %>
+<% end %>

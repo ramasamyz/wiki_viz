@@ -41,3 +41,7 @@ gem 'json'
 
 gem 'wikipedia-client' 
 gem 'nokogiri'
+
+gem 'twitter-bootstrap-rails', :git => 'git://github.com/seyhunak/twitter-bootstrap-rails.git', :branch => "bootstrap3"
+gem "less-rails"
+gem "therubyracer"

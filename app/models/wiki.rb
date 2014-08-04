@@ -2,6 +2,8 @@ require 'wikipedia'
 require 'json'
 require 'debugger'
 require 'nokogiri'
+
+
 class Wiki
   def initialize(page,options)
     title = page.split("\/").last
@@ -15,16 +17,19 @@ class Wiki
   end
 
   def parse_table
-    table = @tables.first
+@parsed = Hash.new
+
+i = 1
+
+  @tables.collect do |table| 
     headers = Array.new
 
     table.children.css('tr').first.css('th').each do |child|
       text = child.text.strip!
-      text = text.gsub!(' ','')
+      text = text.gsub(/[^0-9A-Za-z]/, '')
       headers << text
     end
-    headers = ['first','second','third']
-    print headers
+
     total = Array.new
     table.children.css('tr').drop(1).each do |child|
       content = Hash.new
@@ -37,8 +42,12 @@ class Wiki
       end
       total << content
     end
-    return total.reject!{|element| element.empty?}.to_json
+    @parsed["Table##{i}"] = total.reject{|element| element.empty?}
+    i+=1
+end
+return @parsed
   end
+
   def title
     @page.title
   end
