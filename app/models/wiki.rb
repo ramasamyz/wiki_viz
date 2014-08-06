@@ -37,15 +37,16 @@ i = 1
         |header,element|
         unless (element.nil?)
           content_txt = element.text.strip!
-        content[header] = content_txt
+          content_txt = content_txt.gsub(/[^.0-9A-Za-z]/, '_')
+          content[header] = content_txt
         end
       end
-      total << content
+        total << content
     end
     @parsed["Table##{i}"] = total.reject{|element| element.empty?}
     i+=1
-end
-return @parsed
+  end
+  return @parsed
   end
 
   def title
